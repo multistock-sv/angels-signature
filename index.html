@@ -2059,41 +2059,33 @@ video {
 <!-- ===== HEADER ===== -->
 <header class="glass-header sticky top-0 z-40 border-b border-white/[0.06]">
     <div class="mx-auto max-w-[1400px] px-5 sm:px-8">
-        <div class="flex h-[74px] items-center justify-between gap-6">
-            <a href="index.html" class="group flex items-center gap-3.5 shrink-0">
+        <!-- Fila 1: Logo | Nav | Contactar -->
+        <div class="flex h-[74px] items-center justify-between gap-3 sm:gap-6">
+            <a href="index.html" class="group flex items-center gap-3 shrink-0">
                 <img src="logo-angel.png" alt="Angel's Signature" style="width:42px;height:42px;object-fit:contain;">
-                <span class="leading-none">
+                <span class="leading-none hidden sm:block">
                     <span class="block display text-[17px] font-medium tracking-[0.02em] text-[var(--text)]">Angel's Signature</span>
                     <span class="mono mt-1.5 block text-[8px] font-medium tracking-[0.38em] text-[var(--gold)]/85 uppercase">Boutique &amp; Tech</span>
                 </span>
             </a>
 
-            <nav class="hidden items-center gap-1 md:flex">
+            <nav class="flex items-center gap-1 sm:gap-3">
                 <a href="index.html" class="nav-link active">Inicio</a>
                 <a href="ropa.html" class="nav-link">Ropa</a>
             </nav>
 
-            <div class="relative mx-6 hidden max-w-sm flex-1 md:block">
-                <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[11px] text-white/30"></i>
-                <input type="text" id="desktop-search" oninput="debouncedSearch(this.value)" placeholder="Buscar reloj, teclado, gafas..." class="search-field" />
-            </div>
-
-            <div class="flex items-center gap-3">
-                <a id="nav-whatsapp-btn" href="#" target="_blank" class="btn-gold !px-5 !py-2.5 !text-[10px]">
-                    <i class="fa-brands fa-whatsapp text-[13px]"></i>
-                    <span class="hidden sm:inline">Contactar</span>
-                </a>
-            </div>
+            <a id="nav-whatsapp-btn" href="#" target="_blank" class="btn-gold !px-3.5 !py-2.5 !text-[10px] sm:!px-5 shrink-0">
+                <i class="fa-brands fa-whatsapp text-[13px]"></i>
+                <span class="hidden sm:inline">Contactar</span>
+            </a>
         </div>
 
-        <div class="pb-3 md:hidden">
-            <div class="mb-3 flex gap-2">
-                <a href="index.html" class="flex-1 text-center mono text-[10px] font-semibold tracking-[0.18em] uppercase px-3 py-2.5 border rounded-sm" style="border-color: var(--gold); color: var(--gold); background: rgba(200,169,106,0.08);">Inicio</a>
-                <a href="ropa.html" class="flex-1 text-center mono text-[10px] font-medium tracking-[0.18em] uppercase px-3 py-2.5 border rounded-sm transition" style="border-color: rgba(255,255,255,0.1); color: rgba(245,242,236,0.6);">Ropa</a>
-            </div>
-            <div class="relative w-full">
+        <!-- Fila 2: Buscador -->
+        <div class="pb-3">
+            <div class="relative w-full max-w-md mx-auto">
                 <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[11px] text-white/30"></i>
-                <input type="text" id="mobile-search" oninput="debouncedSearch(this.value)" placeholder="Buscar producto..." class="search-field" />
+                <input type="text" id="desktop-search" oninput="debouncedSearch(this.value)" placeholder="Buscar reloj, teclado, gafas..." class="search-field" />
+                <input type="hidden" id="mobile-search" value="" aria-hidden="true" />
             </div>
         </div>
     </div>
@@ -2895,8 +2887,10 @@ video {
         activeCategory = 'todos';
         searchQuery = '';
         sortOption = 'default';
-        document.getElementById('desktop-search').value = '';
-        document.getElementById('mobile-search').value = '';
+        const dSearch = document.getElementById('desktop-search');
+        const mSearch = document.getElementById('mobile-search');
+        if (dSearch) dSearch.value = '';
+        if (mSearch) mSearch.value = '';
         document.getElementById('sort-select').value = 'default';
         renderVisualFilters();
         renderProductsGrid();
