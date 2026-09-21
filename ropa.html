@@ -37,7 +37,6 @@
         --shadow-sm: 0 2px 12px -4px rgba(26, 20, 16, 0.15);
         --shadow-md: 0 18px 40px -18px rgba(26, 20, 16, 0.28);
         --shadow-lg: 0 30px 70px -30px rgba(26, 20, 16, 0.35);
-        /* bg accent para bordes/rgba */
         --bg-rgb: 219, 200, 160;
     }
 
@@ -1284,6 +1283,44 @@
         color: var(--accent);
     }
 
+    /* ===== SELECTOR DE TALLAS ===== */
+    .modal-sizes {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .size-btn {
+        min-width: 48px;
+        height: 42px;
+        padding: 0 0.9rem;
+        border: 1px solid var(--line-2);
+        background: rgba(255, 255, 255, 0.2);
+        color: var(--text-soft);
+        font-family: 'Jost', sans-serif;
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-radius: 2px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .size-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    .size-btn.active {
+        background: var(--text);
+        color: var(--bg);
+        border-color: var(--text);
+    }
+
     .modal-features {
         list-style: none;
         display: flex;
@@ -1654,10 +1691,19 @@
 
                 <div class="modal-section">
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
-                        <span class="modal-label" style="margin-bottom:0;">Variante</span>
+                        <span class="modal-label" style="margin-bottom:0;">Color</span>
                         <span id="modal-variant-name" class="modal-variant-name">-</span>
                     </div>
                     <div id="modal-variants" class="modal-variants"></div>
+                </div>
+
+                <!-- ===== SELECTOR DE TALLAS (se oculta si el producto no tiene tallas) ===== -->
+                <div class="modal-section" id="modal-sizes-section" style="display: none;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
+                        <span class="modal-label" style="margin-bottom:0;">Talla</span>
+                        <span id="modal-size-name" class="modal-variant-name">-</span>
+                    </div>
+                    <div id="modal-sizes" class="modal-sizes"></div>
                 </div>
 
                 <div class="modal-section">
@@ -1708,11 +1754,19 @@
     ];
 
     // ⚠️ ACÁ VAN LOS PRODUCTOS DE ROPA
+    // Campos opcionales por producto:
+    //   - sizes: ["S", "M", "L", "XL"]  → si no se pone o está vacío, NO se muestra el selector de tallas
+    // Ejemplo de producto CON tallas:
+    //   sizes: ["S", "M", "L", "XL"]
+    // Ejemplo de producto SIN tallas (ej: gorra):
+    //   (no se pone el campo sizes)
     const PRODUCTS = [];
 
     let activeCategory = 'todo';
     let sortOption = 'default';
     let currentProductIndex = 0;
+    let currentVariantIndex = 0;
+    let currentSizeIndex = 0;
     let revealObserver = null;
 
     // ===== REVEAL OBSERVER =====
@@ -1832,6 +1886,9 @@
     // ===== MODAL =====
     function openModal(index) {
         currentProductIndex = index;
+        currentVariantIndex = 0;
+        currentSizeIndex = 0;
+
         const product = PRODUCTS[index];
 
         document.getElementById('modal-image').src = product.variants[0].image;
@@ -1859,6 +1916,7 @@
             features.appendChild(li);
         });
 
+        // Render variantes (colores)
         const variants = document.getElementById('modal-variants');
         variants.innerHTML = '';
         product.variants.forEach((v, idx) => {
@@ -1869,6 +1927,9 @@
             variants.appendChild(btn);
         });
 
+        // Render tallas (solo si el producto tiene el campo "sizes" con elementos)
+        renderSizes(product);
+
         updateVariant(0);
 
         const modal = document.getElementById('product-modal');
@@ -1876,7 +1937,30 @@
         document.body.style.overflow = 'hidden';
     }
 
+    function renderSizes(product) {
+        const section = document.getElementById('modal-sizes-section');
+        const container = document.getElementById('modal-sizes');
+
+        if (!product.sizes || product.sizes.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        container.innerHTML = '';
+        product.sizes.forEach((size, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'size-btn' + (idx === 0 ? ' active' : '');
+            btn.textContent = size;
+            btn.onclick = (e) => { e.stopPropagation(); updateSize(idx); };
+            container.appendChild(btn);
+        });
+
+        document.getElementById('modal-size-name').textContent = product.sizes[0];
+    }
+
     function updateVariant(idx) {
+        currentVariantIndex = idx;
         const product = PRODUCTS[currentProductIndex];
         const variant = product.variants[idx];
 
@@ -1889,10 +1973,38 @@
 
         document.getElementById('modal-variant-name').textContent = variant.name;
 
-        const btn = document.getElementById('modal-wa-btn');
-        const shippingText = product.requiresShippingFee ? ' (+ tarifa de envío)' : '';
-        const message = `Hola Angel's Signature! Me interesa la prenda *${product.title}* [Opción: ${variant.name}] por *${product.price}*${shippingText}.\n\n💡 Quisiera saber cuánto es el costo de envío a mi ubicación y qué otras prendas tienen disponibles.`;
+        document.querySelectorAll('.variant-thumb').forEach((el, i) => {
+            el.classList.toggle('active', i === idx);
+        });
 
+        updateWhatsAppLink();
+    }
+
+    function updateSize(idx) {
+        currentSizeIndex = idx;
+        const product = PRODUCTS[currentProductIndex];
+        if (!product.sizes || !product.sizes[idx]) return;
+
+        document.getElementById('modal-size-name').textContent = product.sizes[idx];
+
+        document.querySelectorAll('.size-btn').forEach((el, i) => {
+            el.classList.toggle('active', i === idx);
+        });
+
+        updateWhatsAppLink();
+    }
+
+    function updateWhatsAppLink() {
+        const product = PRODUCTS[currentProductIndex];
+        const variant = product.variants[currentVariantIndex];
+        const hasSizes = product.sizes && product.sizes.length > 0;
+        const size = hasSizes ? product.sizes[currentSizeIndex] : null;
+
+        const shippingText = product.requiresShippingFee ? ' (+ tarifa de envío)' : '';
+        const sizeText = size ? `, Talla: ${size}` : '';
+        const message = `Hola Angel's Signature! Me interesa la prenda *${product.title}* [Color: ${variant.name}${sizeText}] por *${product.price}*${shippingText}.\n\n💡 Quisiera saber cuánto es el costo de envío a mi ubicación y qué otras prendas tienen disponibles.`;
+
+        const btn = document.getElementById('modal-wa-btn');
         if (product.available) {
             btn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
             btn.className = 'btn-submit';
@@ -1902,10 +2014,6 @@
             btn.className = 'btn-submit disabled';
             btn.innerHTML = `<i class="fa-solid fa-ban"></i><span>Producto Agotado</span>`;
         }
-
-        document.querySelectorAll('.variant-thumb').forEach((el, i) => {
-            el.classList.toggle('active', i === idx);
-        });
     }
 
     function closeModal() {
