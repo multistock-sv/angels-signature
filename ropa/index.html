@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#DBC8A0" />
+<meta name="color-scheme" content="light" />
 <link rel="icon" type="image/png" href="logo-angel.png">
 <title>Angel's Closet · Ropa | Angel's Signature</title>
 
@@ -14,6 +15,13 @@
 <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'" />
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" /></noscript>
 
+<noscript>
+<style>
+    /* Fallback sin JS: mostrar todo lo que normalmente se revela por scroll */
+    .reveal, .product-card { opacity: 1 !important; transform: none !important; }
+</style>
+</noscript>
+
 <style>
     /* ============================================
        ANGEL'S CLOSET — Estilo Editorial Cálido
@@ -21,6 +29,7 @@
        ============================================ */
 
     :root {
+        color-scheme: light;
         --bg: #DBC8A0;
         --bg-2: #CFB98C;
         --bg-3: #C1A977;
@@ -1460,7 +1469,15 @@
     @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
             animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
+        }
+        /* Fallback: si el usuario tiene reducido el movimiento,
+           NO ocultamos el contenido. Se muestra todo de una. */
+        .reveal, .product-card {
+            opacity: 1 !important;
+            transform: none !important;
+            transition: none !important;
         }
     }
 </style>
@@ -1743,6 +1760,7 @@
     const WHATSAPP_CHANNEL_URL = "https://whatsapp.com/channel/0029Vb95qYTCXC3OAlNQIv42";
 
     const PREFERS_REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const HAS_INTERSECTION_OBSERVER = 'IntersectionObserver' in window;
 
     const VISUAL_CATEGORIES = [
         { id: 'todo', label: 'Todo', icon: 'fa-solid fa-border-all' },
@@ -1771,7 +1789,13 @@
 
     // ===== REVEAL OBSERVER =====
     function initRevealObserver() {
-        if (PREFERS_REDUCED_MOTION) return;
+        // Si el usuario tiene reducido el movimiento o el navegador no soporta
+        // IntersectionObserver, NO creamos observer. observeReveals() se encargará
+        // de mostrar todo inmediatamente.
+        if (PREFERS_REDUCED_MOTION || !HAS_INTERSECTION_OBSERVER) {
+            revealObserver = null;
+            return;
+        }
         revealObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -1783,8 +1807,12 @@
     }
 
     function observeReveals(scope) {
-        if (PREFERS_REDUCED_MOTION) return;
         const nodes = (scope || document).querySelectorAll('.reveal:not(.in), .product-card:not(.in)');
+        // Fallback: sin observer (reduced motion / navegador viejo) → mostrar todo ya.
+        if (!revealObserver) {
+            nodes.forEach(n => n.classList.add('in'));
+            return;
+        }
         nodes.forEach(n => revealObserver.observe(n));
     }
 
