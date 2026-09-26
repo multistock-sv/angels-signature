@@ -1307,20 +1307,28 @@ section, footer, main { contain: layout style; }
     color: rgba(107,74,56,.75); letter-spacing: .06em;
 }
 
-/* ====== Nav links ====== */
+/* ====== Nav links (pill activo) ====== */
 .nav-link {
     display: inline-flex; align-items: center;
-    padding: 0.65rem 1rem;
+    padding: 0.6rem 1.1rem;
     font-family: 'Jost', sans-serif;
-    font-size: 10.5px; font-weight: 500;
-    letter-spacing: 0.18em; text-transform: uppercase;
-    color: rgba(43,33,27,.6);
-    border-bottom: 2px solid transparent;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: rgba(43,33,27,.7);
+    border-radius: 999px;
+    background: transparent;
     transition: all 0.35s ease;
     white-space: nowrap;
 }
-.nav-link:hover { color: var(--terra); border-bottom-color: rgba(181,103,75,.4); }
-.nav-link.active { color: var(--terra); font-weight: 600; border-bottom-color: var(--terra); }
+.nav-link:hover {
+    color: var(--terra);
+    background: rgba(181,103,75,.07);
+}
+.nav-link.active {
+    color: #FFFFFF;
+    background: var(--terra);
+    box-shadow: 0 6px 16px -8px rgba(181,103,75,.6);
+}
 
 /* ====== Banner Angel's Closet ====== */
 .banner-closet {
@@ -1421,7 +1429,7 @@ section, footer, main { contain: layout style; }
                 </span>
             </a>
 
-            <nav class="flex items-center gap-1 sm:gap-3">
+            <nav class="flex items-center gap-1 sm:gap-2">
                 <a href="index.html" class="nav-link active">Inicio</a>
                 <a href="ropa/" class="nav-link">Ropa</a>
             </nav>
@@ -1625,7 +1633,7 @@ section, footer, main { contain: layout style; }
         </div>
     </div>
 
-    <div id="products-grid" class="grid grid-cols-2 gap-3.5 sm:gap-5 md:grid-cols-3 lg:grid-cols-4"></div>
+    <div id="products-grid" class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-3"></div>
 
     <div id="no-results" class="hidden py-24 text-center">
         <i class="fa-regular fa-gem mb-5 block text-3xl text-[var(--terra)]/40"></i>
