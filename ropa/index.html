@@ -17,7 +17,6 @@
 
 <noscript>
 <style>
-    /* Fallback sin JS: mostrar todo lo que normalmente se revela por scroll */
     .reveal, .product-card { opacity: 1 !important; transform: none !important; }
 </style>
 </noscript>
@@ -189,14 +188,10 @@
     }
 
     .nav {
-        display: none;
+        display: flex;
         align-items: center;
-        gap: 0.25rem;
-        margin-left: 1rem;
-    }
-
-    @media (min-width: 768px) {
-        .nav { display: flex; }
+        gap: 0.15rem;
+        margin-left: 0.5rem;
     }
 
     .nav-link {
@@ -1453,9 +1448,13 @@
 
     /* ===== RESPONSIVE AJUSTES ===== */
     @media (max-width: 640px) {
-        .header-inner { height: 66px; padding: 0 1rem; }
+        .header-inner { height: 70px; padding: 0 1rem; gap: 0.5rem; }
         .brand-logo { width: 38px; height: 38px; }
-        .brand-name { font-size: 17px; }
+        .brand-name { font-size: 15px; }
+        .brand-sub { display: none; }
+        .nav { gap: 0.1rem; margin-left: 0; }
+        .nav-link { font-size: 10.5px; padding: 0.5rem 0.7rem; letter-spacing: 0.08em; }
+        .nav-link.active::after { left: 0.7rem; right: 0.7rem; bottom: 2px; }
         .hero { padding: 3.5rem 1.25rem 3rem; }
         .hero-meta { gap: 1rem; }
         .hero-meta-sep { display: none; }
@@ -1472,8 +1471,6 @@
             animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
         }
-        /* Fallback: si el usuario tiene reducido el movimiento,
-           NO ocultamos el contenido. Se muestra todo de una. */
         .reveal, .product-card {
             opacity: 1 !important;
             transform: none !important;
@@ -1714,7 +1711,6 @@
                     <div id="modal-variants" class="modal-variants"></div>
                 </div>
 
-                <!-- ===== SELECTOR DE TALLAS (se oculta si el producto no tiene tallas) ===== -->
                 <div class="modal-section" id="modal-sizes-section" style="display: none;">
                     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem;">
                         <span class="modal-label" style="margin-bottom:0;">Talla</span>
@@ -1771,13 +1767,6 @@
         { id: 'accesorios', label: 'Accesorios', icon: 'fa-solid fa-glasses' }
     ];
 
-    // ⚠️ ACÁ VAN LOS PRODUCTOS DE ROPA
-    // Campos opcionales por producto:
-    //   - sizes: ["S", "M", "L", "XL"]  → si no se pone o está vacío, NO se muestra el selector de tallas
-    // Ejemplo de producto CON tallas:
-    //   sizes: ["S", "M", "L", "XL"]
-    // Ejemplo de producto SIN tallas (ej: gorra):
-    //   (no se pone el campo sizes)
     const PRODUCTS = [];
 
     let activeCategory = 'todo';
@@ -1787,11 +1776,7 @@
     let currentSizeIndex = 0;
     let revealObserver = null;
 
-    // ===== REVEAL OBSERVER =====
     function initRevealObserver() {
-        // Si el usuario tiene reducido el movimiento o el navegador no soporta
-        // IntersectionObserver, NO creamos observer. observeReveals() se encargará
-        // de mostrar todo inmediatamente.
         if (PREFERS_REDUCED_MOTION || !HAS_INTERSECTION_OBSERVER) {
             revealObserver = null;
             return;
@@ -1808,7 +1793,6 @@
 
     function observeReveals(scope) {
         const nodes = (scope || document).querySelectorAll('.reveal:not(.in), .product-card:not(.in)');
-        // Fallback: sin observer (reduced motion / navegador viejo) → mostrar todo ya.
         if (!revealObserver) {
             nodes.forEach(n => n.classList.add('in'));
             return;
@@ -1816,7 +1800,6 @@
         nodes.forEach(n => revealObserver.observe(n));
     }
 
-    // ===== FILTROS =====
     function renderFilters() {
         const container = document.getElementById('filters-container');
         container.innerHTML = '';
@@ -1839,7 +1822,6 @@
         });
     }
 
-    // ===== PRODUCTOS =====
     function getFilteredProducts() {
         let list = PRODUCTS.filter(p => {
             if (activeCategory === 'todo') return true;
@@ -1911,7 +1893,6 @@
         observeReveals(grid);
     }
 
-    // ===== MODAL =====
     function openModal(index) {
         currentProductIndex = index;
         currentVariantIndex = 0;
@@ -1944,7 +1925,6 @@
             features.appendChild(li);
         });
 
-        // Render variantes (colores)
         const variants = document.getElementById('modal-variants');
         variants.innerHTML = '';
         product.variants.forEach((v, idx) => {
@@ -1955,7 +1935,6 @@
             variants.appendChild(btn);
         });
 
-        // Render tallas (solo si el producto tiene el campo "sizes" con elementos)
         renderSizes(product);
 
         updateVariant(0);
@@ -2050,7 +2029,6 @@
         document.body.style.overflow = '';
     }
 
-    // ===== INIT =====
     document.addEventListener('DOMContentLoaded', () => {
         initRevealObserver();
 
