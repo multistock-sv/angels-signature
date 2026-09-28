@@ -8,6 +8,9 @@
 <link rel="icon" type="image/png" href="logo-angel.png">
 <title>Angel's Closet · Ropa | Angel's Signature</title>
 
+<!-- Lenis Smooth Scroll Library -->
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Jost:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -54,6 +57,22 @@
         background: var(--bg);
         scroll-behavior: smooth;
         -webkit-text-size-adjust: 100%;
+        overscroll-behavior-y: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Reglas de compatibilidad para Lenis Smooth Scroll */
+    html.lenis, html.lenis body {
+        height: auto;
+    }
+    .lenis.lenis-smooth {
+        scroll-behavior: auto !important;
+    }
+    .lenis.lenis-smooth [data-lenis-prevent] {
+        overscroll-behavior: contain;
+    }
+    .lenis.lenis-stopped {
+        overflow: hidden;
     }
 
     body {
@@ -66,6 +85,7 @@
         overflow-x: hidden;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        overscroll-behavior: none;
     }
 
     a { color: inherit; text-decoration: none; }
@@ -1679,7 +1699,7 @@
 </footer>
 
 <!-- ===== MODAL DE PRODUCTO ===== -->
-<div id="product-modal" class="modal-overlay" onclick="if(event.target===this) closeModal()">
+<div id="product-modal" class="modal-overlay" data-lenis-prevent onclick="if(event.target===this) closeModal()">
     <div class="modal-panel">
         <div class="modal-header">
             <span class="modal-header-label">Detalle</span>
@@ -1752,6 +1772,27 @@
 </div>
 
 <script>
+    // Detectar si el usuario está en móvil o dispositivo táctil
+    const isTouchDevice = window.matchMedia('(max-width: 768px)').matches || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+    let lenis = null;
+
+    // Solo inicializar Lenis en computadoras de escritorio / laptops
+    if (!isTouchDevice) {
+        lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true,
+            touchMultiplier: 1.5
+        });
+
+        function raf(time) {
+            if (lenis) lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+    }
+
     const WHATSAPP_NUMBER = "+50371323853";
     const WHATSAPP_CHANNEL_URL = "https://whatsapp.com/channel/0029Vb95qYTCXC3OAlNQIv42";
 
@@ -1894,6 +1935,7 @@
     }
 
     function openModal(index) {
+        if (lenis) lenis.stop();
         currentProductIndex = index;
         currentVariantIndex = 0;
         currentSizeIndex = 0;
@@ -2024,6 +2066,7 @@
     }
 
     function closeModal() {
+        if (lenis) lenis.start();
         const modal = document.getElementById('product-modal');
         modal.classList.remove('active');
         document.body.style.overflow = '';
